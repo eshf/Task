@@ -35,16 +35,16 @@ public static ArrayList<Character> createHashMap(String keywordOffsetString)
 public static ArrayList<Character> createDecryptedMap(String keywordOffsetString)
 {
 
-    String a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+   String a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
     LinkedHashSet<Character> map= new LinkedHashSet<Character>();
 
 
-    for (int i = 0; i < keywordOffsetString.length(); i++) 
+    for (int i = 0; i < a.length(); i++) 
     {
-    	map.add(keywordOffsetString.charAt(i));
+    	map.add(a.charAt(i));
     }
-    for (int j = 0; j < a.length(); j++) 
+    for (int j = 0; j < keywordOffsetString.length(); j++) 
     {
     	map.add(a.charAt(j));
     }
@@ -77,17 +77,16 @@ public static ArrayList<Character> createDecryptedMap(String keywordOffsetString
 
 }
 
-public static void encode(String keywordOffsetString, String inputFile, String outputFile) throws FileNotFoundException
-{
+public static void encode(String keyOffset, String inputFile, String outputFile) throws FileNotFoundException, StringIndexOutOfBoundsException{
 
    
     ArrayList<Character> hashlist = new ArrayList<Character>();
 
    
-	hashlist = SubstitutionCipher.createHashMap(keywordOffsetString);
+	hashlist = SubstitutionCipher.createHashMap(keyOffset);
     
     
-    int keyOffset= keywordOffsetString.length();
+    //int keyOffset= ct.length();
 	
 	//take in the message file as input(in task specification)
 	//encryptPlaintext method takes in inputFile as parameter and called in command-line as args[2], output file as args[3]
@@ -121,7 +120,7 @@ public static void encode(String keywordOffsetString, String inputFile, String o
     String cipher = stringBuilder.toString().toUpperCase();
     System.out.println("Plain Text is:"+ cipher);
     
-    String encrypted = "";
+    
     
     char [] plaintext = cipher.toCharArray();
     for(int i = 0; i < plaintext.length; i++)
@@ -142,9 +141,9 @@ public static void encode(String keywordOffsetString, String inputFile, String o
 	{
         //output(write) CipherText as a file (in assignment specification)
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-		 for (int i = 0; i < cipher.length(); i++) 
+		 for (int i = keyOffset.length(); i < cipher.length(); i++) 
 		 {
-            writer.write(cipher.substring(i, i+keyOffset));
+            writer.write(cipher.substring(i, i+cipher.length()));
         }
         writer.close();
 		 }
@@ -158,18 +157,17 @@ public static void encode(String keywordOffsetString, String inputFile, String o
     }
 
 
-public static void decode(String keywordOffsetString, String inputFile, String outputFile) throws FileNotFoundException
-{
+public static void decode(String keyOffsetStr, String inputFile, String outputFile) throws FileNotFoundException, StringIndexOutOfBoundsException{
 	
 
 	ArrayList<Character> alphalist = new ArrayList<Character>();
 
 
-	alphalist = SubstitutionCipher.createDecryptedMap(keywordOffsetString);
+	//alphalist = SubstitutionCipher.createDecryptedMap(dt);
 
-    int keyOffset= keywordOffsetString.length();
+    //int keyOffsetString= dt.length();
     
-	System.out.println(alphalist);
+	//System.out.println(alphalist);
 	//HashMap<String, String> hm= SubstitutionCipher.createHashMap(decryptedString);
 	//take in the ciphertext file as input(in assignment specification)
 	//decryptPlaintext method takes in inputFile as parameter and called in command-line as args[2], output file as args[3]
@@ -200,32 +198,30 @@ public static void decode(String keywordOffsetString, String inputFile, String o
 	}
     
     //accept uppercase characters
-    String cipher = stringBuilder.toString().toUpperCase();
-    System.out.println("Encrypted Text is:"+ cipher);
+    String ciphertext = stringBuilder.toString().toUpperCase();
+    System.out.println("Decrypted Text is:"+ ciphertext);
     
-    String encrypted = "";
-    
-    char [] plaintext = cipher.toCharArray();
-    for(int i = 0; i < plaintext.length; i++)
+    char [] outputText = ciphertext.toCharArray();
+    for(int i = 0; i < outputText.length; i++)
     {
-    	int thealphabet = (int) plaintext[i];
+    	int thealphabet = (int) outputText[i];
     	if(thealphabet <= 90 && thealphabet >= 65)
 		{
     		thealphabet = thealphabet - 65;
     		thealphabet = alphalist.get(thealphabet);
-    		plaintext[i] = (char) thealphabet;
+    		outputText[i] = (char) thealphabet;
 		}
     }
-    cipher = String.copyValueOf(plaintext);
+    ciphertext = String.copyValueOf(outputText);
   
-    System.out.println("Decrypted text is:" + cipher);
+    System.out.println("Decrypted text is:" + ciphertext);
     //write file 
 	try
 	{
         //output(write) CipherText as a file (in assignment specification)
 		BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-		 for (int i = 0; i < cipher.length(); i++) {
-            writer.write(cipher.substring(i, keyOffset +i));
+		 for (int i = keyOffsetStr.length(); i < ciphertext.length(); i++) {
+            writer.write(ciphertext.indexOf(i, i+ciphertext.length()));
         }
         writer.close();
 		 }
@@ -238,22 +234,28 @@ public static void decode(String keywordOffsetString, String inputFile, String o
     
     }
 
-public static void main(String[] args) throws FileNotFoundException{ 
+public static void main(String[] args) throws FileNotFoundException, StringIndexOutOfBoundsException{ 
 	System.out.println(args[1] + " " + args[2] + " " + args[3]);
     if (args.length!=4)
 	{
 		System.out.println("Invalid parameters entered.");
 	}
-    else {
+    try {
 		if (args[0].equalsIgnoreCase("-e"))
 		{
 			SubstitutionCipher.encode(args[1], args[2], args[3]);
 		}
-		else if(args[0].equalsIgnoreCase("-d"))
+		if(args[0].equalsIgnoreCase("-d"))
 		{
 			SubstitutionCipher.decode(args[1], args[2], args[3]);
 		
 		}
-	}   
+    }
+    catch(StringIndexOutOfBoundsException e){
+        e.printStackTrace();
+	} 
+    catch(FileNotFoundException e){
+        e.printStackTrace();
+    }  
 }
 }
